@@ -35,6 +35,68 @@ wss.on('connection',function(conn) {
                 }
                 break;
             }
+
+            case "offer": {
+                var connect = users[data.name];
+                if(connect != null){
+                    conn.otherUser = data.name;
+                    sendToOtherUser(connect,{
+                        type: "offer",
+                        offer : data.offer,
+                        name: conn.name
+                    })
+                }
+                break;
+            }
+
+            case "answer": {
+                var connect = users[data.name];
+
+                if(connect != null) {
+                    conn.otherUser = data.name;
+                    sendToOtherUser(connect,{
+                        type: "answer",
+                        answer : data.answer
+                    })
+                }
+                break;
+            }
+
+            case "candidate": {
+                var connect = users[data.name];
+
+                if(connect != null) {
+                    sendToOtherUser(connect,{
+                        type:"candidate",
+                        candidate: data.candidate
+                    })
+                }
+                break;
+            }
+            
+            case "reject": {
+                var connect = users[data.name];
+
+                if(connect != null) {
+                    sendToOtherUser(connect,{
+                        type:"reject",
+                        name: conn.name
+                    })
+                }
+                break;
+            }
+            
+            case "accept": {
+                var connect = users[data.name];
+
+                if(connect != null) {
+                    sendToOtherUser(connect,{
+                        type:"accept",
+                        name: conn.name
+                    })
+                }
+                break;
+            }
         }
 
     })
