@@ -45,7 +45,7 @@ video {
 
 .call-hang-status {
     position: absolute;
-    z-index: 999;
+    z-index: 99;
     height: 97%;
     width: 100%;
 }
@@ -90,5 +90,43 @@ video {
 .close-icon{
     border-radius: 50%;
     padding: 8px;
+    cursor:pointer;
+}
+
+.call-status-wrap {
+    height: 500px;
+    width: 500px;
+}
+
+.calling-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    z-index: 9;
+}
+
+.calling-action{
+    padding: 400px 0 0 0;
+    display: flex;
+}
+
+.video-toggle{
+    border-radius: 50%;
+    padding: 8px;
+    margin-right: 20px;
+    cursor:pointer;
+}
+.audio-toggle{
+    border-radius: 50%;
+    padding: 8px;
+    margin-right: 20px;
+    cursor:pointer;
+}
+.call-cancel-icon{
+    border-radius: 50%;
+    padding: 8px;
+    margin-right: 20px;
     cursor:pointer;
 }

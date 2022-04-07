@@ -97,11 +97,41 @@ wss.on('connection',function(conn) {
                 }
                 break;
             }
+
+            case "leave":{
+                var connect = users[data.name];
+                connect.otherUser = null
+                if(connect != null) {
+                    sendToOtherUser(connect,{
+                        type:"leave"
+                    })
+                }
+                break;
+            }
+
+            default:
+                sendToOtherUser(conn,{
+                    type:"error",
+                    message:"Command not found: " + data.type
+                })
+                break;
         }
 
     })
     conn.on('close',function() {
         console.log('Connection closed');
+        if(conn.name){
+            delete users[conn.name];
+            if(conn.otherUser){
+                var connect = users[conn.otherUser];
+                conn.otherUser = null;
+                if(conn!= null){
+                    sendToOtherUser(connect, {
+                        type:"leave"
+                    })
+                }
+            }
+        }
     })
 
     conn.send("Hello World");
