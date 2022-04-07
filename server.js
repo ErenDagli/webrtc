@@ -20,6 +20,7 @@ wss.on('connection',function(conn) {
 
         switch(data.type){
             case "login": {
+                debugger;
                 if(users[data.name]){
                     sendToOtherUser(conn,{
                         type: "login",
@@ -37,6 +38,7 @@ wss.on('connection',function(conn) {
             }
 
             case "offer": {
+                debugger;
                 var connect = users[data.name];
                 if(connect != null){
                     conn.otherUser = data.name;
@@ -50,6 +52,7 @@ wss.on('connection',function(conn) {
             }
 
             case "answer": {
+                debugger;
                 var connect = users[data.name];
 
                 if(connect != null) {
@@ -63,6 +66,7 @@ wss.on('connection',function(conn) {
             }
 
             case "candidate": {
+                debugger;
                 var connect = users[data.name];
 
                 if(connect != null) {
@@ -75,6 +79,7 @@ wss.on('connection',function(conn) {
             }
             
             case "reject": {
+                debugger;
                 var connect = users[data.name];
 
                 if(connect != null) {
@@ -87,6 +92,7 @@ wss.on('connection',function(conn) {
             }
             
             case "accept": {
+                debugger;
                 var connect = users[data.name];
 
                 if(connect != null) {
@@ -99,6 +105,7 @@ wss.on('connection',function(conn) {
             }
 
             case "leave":{
+                debugger;
                 var connect = users[data.name];
                 if(connect != null) {
                     sendToOtherUser(connect,{
@@ -109,6 +116,7 @@ wss.on('connection',function(conn) {
             }
 
             default:
+                debugger;
                 sendToOtherUser(conn,{
                     type:"error",
                     message:"Command not found: " + data.type
