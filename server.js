@@ -100,7 +100,6 @@ wss.on('connection',function(conn) {
 
             case "leave":{
                 var connect = users[data.name];
-                connect.otherUser = null
                 if(connect != null) {
                     sendToOtherUser(connect,{
                         type:"leave"
@@ -138,5 +137,7 @@ wss.on('connection',function(conn) {
 })
 
 function sendToOtherUser(connection,message){
-    connection.send(JSON.stringify(message))
+    if(connection != undefined){
+        connection.send(JSON.stringify(message))
+    }
 }

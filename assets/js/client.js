@@ -18,7 +18,7 @@ connection.onmessage = function(msg){
             call_receive.addEventListener("click",function(){
                 acceptCall(data.name);
                 offerProcess(data.offer,data.name);
-                call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action"> <div class="videocam-on">  <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>';
+                call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class="videocam-on">  <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>';
             })
             call_reject.addEventListener("click",function(){
                 alert('Call is rejected');
@@ -171,7 +171,7 @@ function loginProcess(success) {
         myConn.addStream(stream);
         myConn.onaddstream = function(e) {
             remote_video.srcObject = e.stream;
-            call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action"> <div class = "video-on"> <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>'
+            call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class = "video-on"> <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>'
             var video_toggle = document.querySelector('.video-on');
             var audio_toggle = document.querySelector('.audio-on');
             video_toggle.onclick = function(){
