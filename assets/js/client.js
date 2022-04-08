@@ -4,6 +4,19 @@ connection.onopen = function(){
     console.log("Connected to the server");
 }
 
+var recordButton = document.querySelector('#start-recording')
+var downloadButton = document.querySelector('#download-video')
+
+recordButton.addEventListener("click",()=> {
+    if(recordButton.textContent === 'Start Recording'){
+        startRecording();
+    } else {
+        stopRecording();
+        recordButton.textContent = 'Start Recording';
+        downloadButton.disabled = false;
+    }
+})
+
 connection.onmessage = function(msg){
     var data = JSON.parse(msg.data)
     switch (data.type){
@@ -16,6 +29,7 @@ connection.onmessage = function(msg){
             var call_receive = document.querySelector('.call-accept');
             var call_reject = document.querySelector('.call-reject');
             call_receive.addEventListener("click",function(){
+                recordButton.disabled = false;
                 acceptCall(data.name);
                 offerProcess(data.offer,data.name);
                 call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class="videocam-on">  <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>';
@@ -115,7 +129,6 @@ call_btn.addEventListener("click",function(){
     }
 })
 
-var chatArea = document.querySelector('#chat-area');
 var uname;
 var url_string = window.location.href;
 var url = new URL(url_string);
@@ -172,11 +185,10 @@ function loginProcess(success) {
             }]
         });
 
-        dataChannel = myConn.createDataChannel('myDataChannel')
+        dataChannel = myConn.createDataChannel('myDataChannel',{
+            reliable:true
+        })
 
-        dataChannel.onopen = function(event){
-            console.log("open");
-        }
         dataChannel.onerror = function(error) {
             console.log("Error: ", error)
         }
@@ -184,7 +196,7 @@ function loginProcess(success) {
         dataChannel.onmessage = function(event){
             console.log(event.data);
             chatArea.innerHTML += "<div class='left-align' style='display:flex;align-items:center;'> <img src='assets/images/other.jpg' style='height:40px;width:40px' class='caller-image circle'> <div style='font-weight:600;margin: 0 5px;'>" + connected_user + "</div>: </div>" + event.data +" </div></div><br/>";
-        }
+          }
 
         dataChannel.onclose = function(){
             console.log("data channel is closed");
@@ -215,9 +227,9 @@ function loginProcess(success) {
                     audio_toggle_class.innerText = 'mic';
                 }
             }
-    
-            hangup();
 
+            hangup();
+    
         }
 
         myConn.onicecandidate = function(event) {
@@ -231,8 +243,6 @@ function loginProcess(success) {
         }, function(error){
             console.log(error);
         });
-
-
     }
 }
 
@@ -273,13 +283,13 @@ function acceptCall(callee_name){
     })
 }
 
-
 function rejectProcess() {
     call_status.innerHTML = '';
 }
 
 function acceptProcess() {
     call_status.innerHTML = '';
+    recordButton.disabled = false;
 }
 
 function hangup(){
@@ -303,6 +313,7 @@ function leaveProcess(){
 
 var msgInput = document.querySelector('#msg-input');
 var msgSendBtn = document.querySelector('#msg-send-btn');
+var chatArea = document.querySelector('#chat-area');
 msgSendBtn.addEventListener("click", function(event) {
     var msgVal = msgInput.value;
     chatArea.innerHTML += "<div class='right-align'> <div>" + msgVal + "</div>: <div class='text-name'> " + uname + "</div> <div><img src = 'assets/images/me.jpg' style = 'height:40px;width:50px;' class= 'caller-image circle'>   <br/>";
@@ -310,3 +321,65 @@ msgSendBtn.addEventListener("click", function(event) {
     msgInput.value = "";
 })
 
+
+function startRecording(){
+    recordedBlobs = [];
+    let options = { 
+        mimeType : 'video/webm;codecs=vp9,opus'
+    }
+    if(!MediaRecorder.isTypeSupported(options.mimeType)){
+        console.error(`${options.mimeType} is not supported`);
+        options = {
+            mimeType : 'video/webm;codecs=vp8,opus'
+        }
+        if(!MediaRecorder.isTypeSupported(options.mimeType)){
+        console.error(`${options.mimeType} is not supported`);
+            options = {
+                mimeType : 'video/webm'
+            }
+            if(!MediaRecorder.isTypeSupported(options.mimeType)){
+            console.error(`${options.mimeType} is not supported`);
+                options = {
+                   mimeType : ''
+                }
+            }
+        }
+    }
+    try{
+        mediaRecorder = new MediaRecorder(window.stream, options);
+    } catch(e){
+        console.error('MediaRecorder error: ', e);
+    }
+    mediaRecorder.start();
+    console.log("////////////////")
+    recordButton.textContent = 'Stop Recording';
+    downloadButton.disabled = true;
+    mediaRecorder.ondataavailable = handleDataAvailable;
+}
+
+downloadButton.addEventListener("click",()=> {
+    const blob = new Blob(recordedBlobs, {
+        type: 'video/webm'
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'webrtc_record.webm';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=> {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url)
+    }, 100);
+})
+
+function handleDataAvailable(event){
+    if(event.data && event.data.size > 0){
+        recordedBlobs.push(event.data);
+    }
+}
+
+function stopRecording() {
+    mediaRecorder.stop();
+}
