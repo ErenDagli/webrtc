@@ -140,9 +140,6 @@ setTimeout(function() {
 if(connection.readyState === 1){
     if(username != null) {
         uname = username;
-        console.log(uname);
-        console.log(uname);
-        console.log(uname);
         if(uname.length > 0) {
             send({
                 type:"login",
@@ -185,8 +182,11 @@ function loginProcess(success) {
             }]
         });
 
+
         dataChannel = myConn.createDataChannel('myDataChannel',{
-            reliable:true
+            reliable:true,
+            negotiated: true,
+            id:0
         })
 
         dataChannel.onerror = function(error) {
@@ -194,13 +194,13 @@ function loginProcess(success) {
         }
 
         dataChannel.onmessage = function(event){
-            console.log(event.data);
-            chatArea.innerHTML += "<div class='left-align' style='display:flex;align-items:center;'> <img src='assets/images/other.jpg' style='height:40px;width:40px' class='caller-image circle'> <div style='font-weight:600;margin: 0 5px;'>" + connected_user + "</div>: </div>" + event.data +" </div></div><br/>";
+            chatArea.innerHTML += "<div class='left-align' style='display:flex;align-items:center;'> <img src='assets/images/other.jpg' style='height:40px;width:40px' class='caller-image circle'> <div style='font-weight:600;margin: 0 5px;'>" + connected_user + "</div>: " + event.data +" </div></div><br/>";
           }
 
         dataChannel.onclose = function(){
             console.log("data channel is closed");
         }
+    
 
         myConn.addStream(stream);
         myConn.onaddstream = function(e) {
@@ -316,7 +316,7 @@ var msgSendBtn = document.querySelector('#msg-send-btn');
 var chatArea = document.querySelector('#chat-area');
 msgSendBtn.addEventListener("click", function(event) {
     var msgVal = msgInput.value;
-    chatArea.innerHTML += "<div class='right-align'> <div>" + msgVal + "</div>: <div class='text-name'> " + uname + "</div> <div><img src = 'assets/images/me.jpg' style = 'height:40px;width:50px;' class= 'caller-image circle'>   <br/>";
+    chatArea.innerHTML += "<div class='right-align'> <div>" + msgVal + "</div>: <div class='text-name'>" + uname + "</div> <div><img src = 'assets/images/me.jpg' style = 'height:40px;width:50px;' class= 'caller-image circle'> <br/>";
     dataChannel.send(msgVal);
     msgInput.value = "";
 })
@@ -351,7 +351,6 @@ function startRecording(){
         console.error('MediaRecorder error: ', e);
     }
     mediaRecorder.start();
-    console.log("////////////////")
     recordButton.textContent = 'Stop Recording';
     downloadButton.disabled = true;
     mediaRecorder.ondataavailable = handleDataAvailable;
