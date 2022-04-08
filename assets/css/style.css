@@ -139,9 +139,15 @@ video {
 .right-align{
     display: flex;
     align-items: center;
+    align-self: flex-end;
 }
 
 .text-name{
     font-size: 600;
     margin:0 5px;
+}
+
+.left-align{
+    display: flex;
+    align-items: center;
 }
