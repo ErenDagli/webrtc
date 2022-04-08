@@ -32,7 +32,7 @@ connection.onmessage = function(msg){
                 recordButton.disabled = false;
                 acceptCall(data.name);
                 offerProcess(data.offer,data.name);
-                call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class="videocam-on">  <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>';
+                call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class="videocam-on">  <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="screen-toggle"> <i class="material-icons teal darken-2 white-text screen-toggle"> screen_share </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>';
             })
             call_reject.addEventListener("click",function(){
                 alert('Call is rejected');
@@ -205,9 +205,10 @@ function loginProcess(success) {
         myConn.addStream(stream);
         myConn.onaddstream = function(e) {
             remote_video.srcObject = e.stream;
-            call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class = "video-on"> <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>'
+            call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class = "video-on"> <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div><div class="screen-on"> <i class="material-icons teal darken-2 white-text screen-toggle"> screen_share </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>'
             var video_toggle = document.querySelector('.video-on');
             var audio_toggle = document.querySelector('.audio-on');
+            var screen_sharing_toggle = document.querySelector('.screen-on');
             video_toggle.onclick = function(){
                 stream.getVideoTracks()[0].enabled = !(stream.getVideoTracks()[0].enabled);
                 var video_toggle_class = document.querySelector('.video-toggle');
@@ -228,6 +229,13 @@ function loginProcess(success) {
                 }
             }
 
+            screen_sharing_toggle.onclick = function(){
+                navigator.mediaDevices.getDisplayMedia({
+                    video:true,
+                    audio:true
+                }).then(successProcess, errorProcess)
+            }
+
             hangup();
     
         }
@@ -243,8 +251,10 @@ function loginProcess(success) {
         }, function(error){
             console.log(error);
         });
+
     }
 }
+
 
 function offerProcess(offer,name){
     connected_user = name;
@@ -381,4 +391,91 @@ function handleDataAvailable(event){
 
 function stopRecording() {
     mediaRecorder.stop();
+}
+
+function successProcess(stream) { 
+    local_video.srcObject = stream;
+    
+var configuration = {
+    "iceServers" : [{
+        "url":"stun:stun2.1.google.com:19302"
+    }]
+} 
+
+myConn = new webkitRTCPeerConnection(configuration,{
+    optional:[{
+        RtpDataChannels:true
+    }]
+});
+
+
+dataChannel = myConn.createDataChannel('myDataChannel',{
+    reliable:true,
+    negotiated: true,
+    id:0
+})
+
+dataChannel.onerror = function(error) {
+    console.log("Error: ", error)
+}
+
+dataChannel.onmessage = function(event){
+    chatArea.innerHTML += "<div class='left-align' style='display:flex;align-items:center;'> <img src='assets/images/other.jpg' style='height:40px;width:40px' class='caller-image circle'> <div style='font-weight:600;margin: 0 5px;'>" + connected_user + "</div>: " + event.data +" </div></div><br/>";
+  }
+
+dataChannel.onclose = function(){
+    console.log("data channel is closed");
+}
+
+
+myConn.addStream(stream);
+myConn.onaddstream = function(e) {
+    remote_video.srcObject = stream;
+    call_status.innerHTML = '<div class="call-status-wrap white-text"> <div class="calling-wrap"> <div class="calling-action-status"> <div class = "video-on"> <i class="material-icons teal darken-2 white-text video-toggle"> videocam </i> </div> <div class="audio-on"> <i class="material-icons teal darken-2 white-text audio-toggle"> mic </i> </div> <div class="screen-toggle"> <i class="material-icons teal darken-2 white-text screen-toggle"> screen_share </i> </div> <div class="call-cancel"> <i class="call-cancel-icon material-icons red darken-3 white-text"> call </i> </div> </div> </div> </div>'
+    var video_toggle = document.querySelector('.video-on');
+    var audio_toggle = document.querySelector('.audio-on');
+    var screen_sharing_toggle = document.querySelector('.screen-on');
+    video_toggle.onclick = function(){
+        stream.getVideoTracks()[0].enabled = !(stream.getVideoTracks()[0].enabled);
+        var video_toggle_class = document.querySelector('.video-toggle');
+        if(video_toggle_class.innerText == 'videocam'){
+            video_toggle_class.innerText = 'videocam_off';
+        } else {
+            video_toggle_class.innerText = 'videocam';
+        }
+    }
+    
+    audio_toggle.onclick = function(){
+        stream.getAudioTracks()[0].enabled = !(stream.getAudioTracks()[0].enabled);
+        var audio_toggle_class = document.querySelector('.audio-toggle');
+        if(audio_toggle_class.innerText == 'mic'){
+            audio_toggle_class.innerText = 'mic_off';
+        } else {
+            audio_toggle_class.innerText = 'mic';
+        }
+    }
+
+    screen_sharing_toggle.onclick = function(){
+        navigator.mediaDevices.getDisplayMedia({
+            video:true,
+            audio:true
+        }).then(successProcess, errorProcess)
+    }
+
+    hangup();
+
+    myConn.onicecandidate = function(event) {
+        if(event.candidate){
+            send({
+                type:"candidate",
+                candidate: event.candidate
+            })
+        }
+        }
+    }
+}
+
+function errorProcess(error){
+    console.log("getDisplayMedia error : " + error);
+
 }
